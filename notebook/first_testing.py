@@ -3,10 +3,12 @@ import zipfile
 import io
 import os 
 import sys
+from scripts.processing_functions import load_features
 # Aggiungi la root del progetto al Python path
 project_root = os.path.dirname(os.path.abspath(''))
 sys.path.append(project_root)  # Ora Python trova i moduli nella root
-
+# Load metadata and features.
+tracks, genres, features, echonest = load_features()
 #%% explore mp3s zip
 zip_path = os.path.join('..', 'data', 'raw', 'fma_medium.zip')
 with zipfile.ZipFile(zip_path, 'r') as zip_ref:
