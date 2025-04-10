@@ -12,6 +12,7 @@ from scripts.processing_functions import load_features
 tracks, genres, features, echonest = load_features()
 print('Echonest features available for {} tracks.'.format(len(echonest)))
 
+# %% feature processing
 features_clean = features.iloc[3:]
 np.testing.assert_array_equal(features_clean.index, tracks.index)
 assert echonest.index.isin(tracks.index).all()
