@@ -25,6 +25,7 @@ print(tracks_medium.columns)
 genres_top = tracks_medium['track', 'genre_top']
 genres = tracks_medium['track', 'genres']
 genres_all = tracks_medium['track', 'genres_all']
+genres_top.shape
 # try to get an idea if they can be used.
 # it don't matter how well the classification works,
 # it would just matter if it improves when adding "intermediate outputs"
