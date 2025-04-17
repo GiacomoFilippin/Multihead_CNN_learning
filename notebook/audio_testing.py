@@ -17,18 +17,21 @@ from scripts.plotting_functions import make_stft_spectrogram_plot, make_mel_spec
 zip_path = os.path.join('..', 'data', 'raw', 'fma_medium.zip')
 with zipfile.ZipFile(zip_path, 'r') as zip_ref:
     # List all files in the archive
-    print(zip_ref.namelist())
-    # Read a specific file (e.g., 'data/track1.mp3') as bytes
-    with zip_ref.open('fma_medium/000/000002.mp3') as file_in_zip:
-        audio_bytes = file_in_zip.read()
-    # Process the file (e.g., convert to spectrogram)
-    y, sr = librosa.load(io.BytesIO(audio_bytes), sr=44100)
-    # insert bass_band filtering
-    stft_spectrogram = compute_stft_spectrogram(y=y)
-    stft_spectrogram_plot = make_stft_spectrogram_plot(spectrogram=stft_spectrogram, sr=sr)
-    stft_spectrogram_plot.show()
-    mel_spectrogram = compute_mel_spectrogram(y=y)
-    mel_spectrogram_plot = make_mel_spectrogram_plot(spectrogram=mel_spectrogram, sr=sr)
-    mel_spectrogram_plot.show()
+    track_list = [name for name in zip_ref.namelist() if "mp3" in name]
+    print(track_list)
+    for track in track_list:
+        # Read a specific file (e.g., 'data/track1.mp3') as bytes
+        with zip_ref.open(track) as file_in_zip:
+            audio_bytes = file_in_zip.read()
+        print(f"processing track {track}")
+        # Process the file (e.g., convert to spectrogram)
+        y, sr = librosa.load(io.BytesIO(audio_bytes), sr=44100)
+        # insert bass_band filtering
+        stft_spectrogram = compute_stft_spectrogram(y=y)
+        stft_spectrogram_plot = make_stft_spectrogram_plot(spectrogram=stft_spectrogram, sr=sr)
+        stft_spectrogram_plot.show()
+    #mel_spectrogram = compute_mel_spectrogram(y=y)
+    #mel_spectrogram_plot = make_mel_spectrogram_plot(spectrogram=mel_spectrogram, sr=sr)
+    #mel_spectrogram_plot.show()
 
 # %%
