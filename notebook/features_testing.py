@@ -35,3 +35,4 @@ tracks_medium.shape, features_clean.shape, echonest_data.shape
 durations = tracks_medium['track', 'duration']
 genres = tracks_medium['track', 'genre_top']
 # %%
+tracks_medium.index

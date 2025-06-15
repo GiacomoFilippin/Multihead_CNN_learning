@@ -3,16 +3,30 @@ import numpy as np
 import librosa
 import os
 import sys
+import re
+from pathlib import Path
+
 project_root = os.path.dirname(os.path.abspath(''))
 sys.path.append(project_root)  # Ora Python trova i moduli nella root
 
-def load_features(folder=project_root+"\\data\\processed\\fma_metadata"):
-    # Carica i metadati
-    tracks = pd.read_csv(f"{folder}\\tracks.csv", index_col=0, header=[0, 1])
-    genres = pd.read_csv(f"{folder}\\genres.csv", index_col=0)
-    features = pd.read_csv(f"{folder}\\features.csv", index_col=0)
-    echonest = pd.read_csv(f"{folder}\\echonest.csv", index_col=0)
-    
+def extract_track_id(input_string):
+    match = re.search(r'(\d{6})\.mp3$', input_string)
+    if match:
+        return int(match.group(1))  # Converti a intero per rimuovere gli zeri iniziali
+    return None
+
+
+# BASE_DIR punta sempre a …\Multihead_CNN_learning
+BASE_DIR = Path(__file__).resolve().parent.parent  
+
+def load_features(folder: Path = None):
+    if folder is None:
+        folder = BASE_DIR / "data" / "raw" / "fma_metadata"
+    # ora folder è esatto e non dipende dalla CWD
+    tracks   = pd.read_csv(folder / "tracks.csv",   index_col=0, header=[0,1])
+    genres   = pd.read_csv(folder / "genres.csv",   index_col=0)
+    features = pd.read_csv(folder / "features.csv", index_col=0)
+    echonest = pd.read_csv(folder / "echonest.csv", index_col=0)
     return tracks, genres, features, echonest
 
 def compute_mel_spectrogram(y, sr = 44100):
