@@ -1,0 +1,71 @@
+# %%
+from pathlib import Path
+import sys
+import tensorflow as tf
+import matplotlib.pyplot as plt
+import os
+import librosa
+import ast
+
+project_root = os.path.dirname(os.path.abspath(''))
+sys.path.append(project_root)
+# permetti l'import da scripts/
+sys.path.insert(0, str(Path(__file__).parent))
+from read_tfrecord import _parse_example
+from processing_functions import load_features
+from configs.genres_dicts import subgenre_id2name, father_name2id
+
+def show_random_sample(tfrecord_path: str):
+    """
+    Estrae un campione a caso dal TFRecord, stampa titolo, genere e sub‐genere (primo)
+    e visualizza lo spettrogramma.
+    """
+    # 1) Leggi e parsa il TFRecord
+    ds = tf.data.TFRecordDataset(tfrecord_path)
+    ds = ds.map(_parse_example, num_parallel_calls=tf.data.AUTOTUNE)
+    ds = ds.shuffle(buffer_size=10000, reshuffle_each_iteration=True)
+    sample = next(iter(ds.take(1)))
+
+    # 2) Decodifica i campi
+    spec      = sample['spectrogram'].numpy()
+    title     = sample['title'].numpy().decode('utf-8')
+    father    = sample['father_genre'].numpy().decode('utf-8')
+    sub_raw   = sample['sub_genre'].numpy().decode('utf-8')
+
+    # 3) Gestisci lista di sub‐generi e prendi il primo
+    try:
+        sub_list = ast.literal_eval(sub_raw)
+    except Exception:
+        sub_list = [sub_raw]
+    first_sub = sub_list[0]
+    sub_id    = int(first_sub)
+
+    # 4) Stampa i metadati
+    print(f"Track title : {title}")
+    print(f"Father genre: {father}, ID: {father_name2id[father]}")
+    print(f"Sub genre   : {subgenre_id2name[sub_id]}, ID: {sub_id}")
+    print(f"Spectrogram shape: {spec.shape}")
+
+    # 5) Visualizza lo spettrogramma
+    plt.figure(figsize=(8,4))
+    librosa.display.specshow(
+        spec,
+        sr=44100,
+        x_axis='time',
+        y_axis='mel',
+        fmax=8192,
+        cmap='viridis'
+    )
+    plt.title(f"{title}  [{father} / {subgenre_id2name[sub_id]}]")
+    plt.xlabel("Time bins")
+    plt.ylabel("Mel bins")
+    plt.colorbar(format="%+2.0f")
+    plt.tight_layout()
+    plt.show()
+# %%
+ROOT     = Path(__file__).resolve().parent.parent
+TF_PATH  = ROOT / 'data' / 'processed' / 'shards' / "dataset_020.tfrecord"
+print("Looking for:", TF_PATH)
+assert TF_PATH.is_file(), f"TFRecord non trovato: {TF_PATH}"
+show_random_sample(str(TF_PATH))
+# %%
